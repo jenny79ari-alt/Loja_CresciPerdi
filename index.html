@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cresci e Perdi — Moda Infantil</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;min-height:100vh;}
+
+@keyframes rocketFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-18px) rotate(2deg)}}
+@keyframes flamePulse{from{transform:scaleY(1)}to{transform:scaleY(1.4) scaleX(.8)}}
+@keyframes balloonFloat{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-20px) rotate(4deg)}}
+@keyframes waPulse{0%,100%{box-shadow:0 4px 20px rgba(37,211,102,.5)}50%{box-shadow:0 4px 40px rgba(37,211,102,.9)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rocketFloatEl{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-18px) rotate(2deg)}}
+@keyframes flameAnim{0%,100%{transform:scaleY(1) scaleX(1)}50%{transform:scaleY(1.4) scaleX(.8)}}
+
+.pcard{transition:transform .2s,box-shadow .2s;animation:fadeSlide .4s ease both}
+.pcard:hover{transform:translateY(-7px) rotate(-.5deg)!important;box-shadow:0 18px 42px rgba(107,58,31,.18)!important}
+.ccat{transition:all .2s;cursor:pointer;}
+.ccat:hover{transform:scale(1.06)}
+.badd{transition:all .15s}
+.badd:hover{transform:translateY(-2px)}
+.badd:active{transform:translateY(1px)}
+
+/* overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:white;border-radius:24px;padding:32px;max-width:420px;width:100%;position:relative;animation:fadeSlide .3s ease;max-height:90vh;overflow-y:auto}
+.close-btn{position:absolute;top:16px;right:16px;background:#f5f0e8;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;}
+
+/* cart drawer */
+.cart-backdrop{position:fixed;inset:0;z-index:500;display:flex}
+.cart-drawer{background:white;width:min(420px,100vw);display:flex;flex-direction:column;animation:fadeSlide .3s ease}
+
+/* checkout */
+.checkout-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:700;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+.checkout-box{background:white;border-radius:24px;width:100%;max-width:480px;padding:28px;animation:fadeSlide .3s ease;position:relative;max-height:90vh;overflow-y:auto}
+
+/* form inputs */
+.form-input{width:100%;padding:12px 16px;border-radius:12px;box-sizing:border-box;border:2px solid #e8e0d8;background:white;font-family:'Nunito',sans-serif;font-size:15px;outline:none;}
+.form-input.error{border-color:#ef4444;background:#fff5f5}
+.err-msg{color:#ef4444;font-size:12px;margin-top:4px;font-weight:700}
+
+/* progress */
+.prog-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.prog-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:14px;transition:all .3s}
+
+/* pay option */
+.pay-label{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;cursor:pointer;transition:all .2s;border:2px solid #e8e0d8;background:white}
+.pay-label.selected{border-color:#f5b731;background:#fffbf0}
+
+/* toast */
+#toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:white;padding:12px 28px;border-radius:30px;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;z-index:9999;box-shadow:0 8px 30px rgba(0,0,0,.3);animation:toastIn .3s ease;white-space:nowrap;max-width:90vw;text-align:center;display:none}
+
+/* wa button */
+#wa-btn{position:fixed;bottom:24px;right:24px;width:62px;height:62px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.5);z-index:1000;text-decoration:none;animation:waPulse 2.5s ease-in-out infinite}
+
+/* balloon */
+.balloon{animation:balloonFloat 6s ease-in-out infinite}
+.rocket-el{animation:rocketFloat 4s ease-in-out infinite}
+
+/* promo strip */
+.promo-code{background:#3e1f0a;color:#f5b731;padding:2px 14px;border-radius:30px}
+
+/* trust badges */
+.badge{background:white;border:2px solid #f5b731;border-radius:20px;padding:8px 20px;font-weight:800;font-size:14px;color:#6b3a1f;box-shadow:0 3px 10px rgba(107,58,31,.1)}
+
+/* category pills */
+.cat-pill{font-family:'Fredoka One',cursive;font-size:14px;padding:8px 22px;border-radius:30px;border:none;cursor:pointer}
+.cat-pill.active{background:#6b3a1f;color:#f5b731;box-shadow:0 4px 0 #3e1f0a}
+.cat-pill:not(.active){background:white;color:#6b3a1f;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+
+/* product grid */
+#product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px;max-width:1100px;margin:0 auto}
+
+/* qty btns */
+.qty-minus{width:28px;height:28px;border-radius:50%;border:2px solid #f5b731;background:white;cursor:pointer;font-weight:800;font-size:16px;color:#6b3a1f;display:flex;align-items:center;justify-content:center}
+.qty-plus{width:28px;height:28px;border-radius:50%;border:none;background:#f5b731;cursor:pointer;font-weight:800;font-size:16px;color:#3e1f0a;display:flex;align-items:center;justify-content:center}
+
+@media(max-width:480px){
+  .hero-title{font-size:2rem!important}
+  #product-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER CREDIT -->
+<div style="text-align:center;padding:10px 16px;font-family:'Nunito',sans-serif;font-size:13px;color:#fff;background:linear-gradient(135deg,#3e1f0a,#6b3a1f)">
+  Desenvolvido por <strong>Jennifer Silveira</strong> &bull; <a href="mailto:jenny79ari@gmail.com" style="color:#f5b731;text-decoration:none">jenny79ari@gmail.com</a> &bull; 19 de maio de 2026 &bull; © 2026
+</div>
+
+<!-- HERO -->
+<div style="background:linear-gradient(180deg,#3b8fd4 0%,#5ba8e0 45%,#a8d4f5 100%);min-height:450px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center">
+
+  <!-- balloons -->
+  <div class="balloon" style="position:absolute;top:8%;left:5%;width:60px">
+    <svg viewBox="0 0 60 80" style="width:100%"><ellipse cx="30" cy="28" rx="25" ry="28" fill="#f5b731"/><path d="M5 28 Q10 50 18 55 Q30 60 42 55 Q50 50 55 28" fill="#e8853a"/><rect x="9" y="28" width="42" height="4" rx="2" fill="rgba(255,255,255,.5)"/><rect x="20" y="55" width="20" height="12" rx="4" fill="#6b3a1f"/><ellipse cx="30" cy="14" rx="10" ry="12" fill="#f5b731" opacity=".6"/></svg>
+  </div>
+  <div class="balloon" style="position:absolute;top:20%;right:7%;width:55px;animation-delay:.8s">
+    <svg viewBox="0 0 60 80" style="width:100%"><ellipse cx="30" cy="28" rx="25" ry="28" fill="#5ba8e0"/><path d="M5 28 Q10 50 18 55 Q30 60 42 55 Q50 50 55 28" fill="#3a7fb8"/><rect x="9" y="28" width="42" height="4" rx="2" fill="rgba(255,255,255,.5)"/><rect x="20" y="55" width="20" height="12" rx="4" fill="#6b3a1f"/><ellipse cx="30" cy="14" rx="10" ry="12" fill="#5ba8e0" opacity=".6"/></svg>
+  </div>
+  <div class="balloon" style="position:absolute;top:52%;left:11%;width:50px;animation-delay:1.5s">
+    <svg viewBox="0 0 60 80" style="width:100%"><ellipse cx="30" cy="28" rx="25" ry="28" fill="#d94040"/><path d="M5 28 Q10 50 18 55 Q30 60 42 55 Q50 50 55 28" fill="#b03030"/><rect x="9" y="28" width="42" height="4" rx="2" fill="rgba(255,255,255,.5)"/><rect x="20" y="55" width="20" height="12" rx="4" fill="#6b3a1f"/><ellipse cx="30" cy="14" rx="10" ry="12" fill="#d94040" opacity=".6"/></svg>
+  </div>
+  <div class="balloon" style="position:absolute;top:13%;right:24%;width:48px;animation-delay:2.2s">
+    <svg viewBox="0 0 60 80" style="width:100%"><ellipse cx="30" cy="28" rx="25" ry="28" fill="#a0d97a"/><path d="M5 28 Q10 50 18 55 Q30 60 42 55 Q50 50 55 28" fill="#7ab850"/><rect x="9" y="28" width="42" height="4" rx="2" fill="rgba(255,255,255,.5)"/><rect x="20" y="55" width="20" height="12" rx="4" fill="#6b3a1f"/><ellipse cx="30" cy="14" rx="10" ry="12" fill="#a0d97a" opacity=".6"/></svg>
+  </div>
+
+  <!-- clouds -->
+  <div style="position:absolute;top:14%;left:18%;width:150px;height:52px;background:rgba(255,255,255,.82);border-radius:50px;filter:blur(2px)"></div>
+  <div style="position:absolute;top:34%;right:14%;width:115px;height:52px;background:rgba(255,255,255,.82);border-radius:50px;filter:blur(2px)"></div>
+  <div style="position:absolute;top:62%;left:40%;width:165px;height:52px;background:rgba(255,255,255,.82);border-radius:50px;filter:blur(2px)"></div>
+
+  <!-- topbar -->
+  <div style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:16px 24px;position:relative;z-index:10">
+    <div style="font-family:'Fredoka One',cursive;font-size:22px;color:white;text-shadow:2px 2px 0 rgba(0,0,0,.2)">🦒 Cresci e Perdi</div>
+    <button onclick="openCart()" style="position:relative;background:#f5b731;border:none;border-radius:30px;padding:10px 22px;font-family:'Fredoka One',cursive;font-size:16px;color:#3e1f0a;cursor:pointer;box-shadow:0 4px 0 #c48a00">
+      🛒 Carrinho
+      <span id="cart-badge" style="position:absolute;top:-8px;right:-8px;background:#ef4444;color:white;border-radius:50%;width:22px;height:22px;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:800">0</span>
+    </button>
+  </div>
+
+  <!-- hero body -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:14px;position:relative;z-index:10;padding:0 20px 40px">
+    <!-- rocket -->
+    <div class="rocket-el" style="width:115px;position:relative">
+      <svg viewBox="0 0 130 260" style="width:100%">
+        <ellipse cx="65" cy="120" rx="45" ry="100" fill="#e8eef5"/>
+        <path d="M65 5 Q85 35 85 65 Q75 58 65 55 Q55 58 45 65 Q45 35 65 5Z" fill="#f5b731"/>
+        <rect x="22" y="170" width="86" height="18" rx="6" fill="#3e1f0a"/>
+        <circle cx="35" cy="179" r="5" fill="#f5b731"/>
+        <circle cx="50" cy="179" r="5" fill="#f5b731"/>
+        <circle cx="65" cy="179" r="5" fill="#f5b731"/>
+        <circle cx="80" cy="179" r="5" fill="#f5b731"/>
+        <circle cx="95" cy="179" r="5" fill="#f5b731"/>
+        <circle cx="65" cy="110" r="36" fill="#3e1f0a"/>
+        <circle cx="65" cy="110" r="31" fill="#87ceeb"/>
+        <ellipse cx="65" cy="115" rx="22" ry="20" fill="#f5b731"/>
+        <circle cx="58" cy="106" r="5" fill="white"/><circle cx="72" cy="106" r="5" fill="white"/>
+        <circle cx="58" cy="107" r="3.5" fill="#222"/><circle cx="72" cy="107" r="3.5" fill="#222"/>
+        <circle cx="59" cy="106" r="1.2" fill="white"/><circle cx="73" cy="106" r="1.2" fill="white"/>
+        <ellipse cx="65" cy="122" rx="12" ry="7" fill="#e8a030"/>
+        <circle cx="60" cy="122" r="2.5" fill="#8b4500"/><circle cx="70" cy="122" r="2.5" fill="#8b4500"/>
+        <path d="M57 128 Q65 134 73 128" stroke="#8b4500" stroke-width="2" fill="none"/>
+        <rect x="54" y="92" width="5" height="9" rx="2.5" fill="#c48a00"/>
+        <rect x="71" y="90" width="5" height="10" rx="2.5" fill="#c48a00"/>
+        <circle cx="56.5" cy="92" r="4" fill="#f5b731"/>
+        <circle cx="73.5" cy="90" r="4" fill="#f5b731"/>
+        <path d="M20 165 Q0 200 10 230 L40 205 L30 188Z" fill="#f5b731"/>
+        <path d="M110 165 Q130 200 120 230 L90 205 L100 188Z" fill="#f5b731"/>
+      </svg>
+      <svg viewBox="0 0 40 55" style="width:34.5px;display:block;margin:0 auto;animation:flameAnim 0.4s ease-in-out infinite alternate">
+        <path d="M20 0 Q30 20 25 35 Q20 50 20 55 Q20 50 15 35 Q10 20 20 0Z" fill="#f5b731"/>
+        <path d="M20 10 Q26 25 23 38 Q20 50 20 55 Q20 50 17 38 Q14 25 20 10Z" fill="#e8853a"/>
+        <path d="M20 20 Q24 32 22 42 Q20 52 20 55 Q20 52 18 42 Q16 32 20 20Z" fill="white" opacity=".6"/>
+      </svg>
+    </div>
+
+    <h1 class="hero-title" style="font-family:'Fredoka One',cursive;font-size:clamp(2rem,6vw,3.2rem);color:white;text-shadow:3px 3px 0 #6b3a1f,5px 5px 0 rgba(0,0,0,.1);text-align:center;margin:0">
+      Moda que <span style="color:#f5b731">Voa!</span> 🚀
+    </h1>
+    <p style="color:white;font-size:16px;font-weight:700;text-align:center;max-width:430px;text-shadow:1px 1px 0 rgba(0,0,0,.3);margin:0">
+      Roupinhas incríveis para os pequenos grandes aventureiros.<br/>
+      <span style="color:#f5b731">✨ Frete grátis acima de R$ 199 • Entrega rápida</span>
+    </p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+      <button onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})" style="background:#f5b731;color:#3e1f0a;font-family:'Fredoka One',cursive;font-size:16px;padding:12px 30px;border-radius:30px;border:none;cursor:pointer;box-shadow:0 5px 0 #c48a00">
+        🎁 Ver Catálogo
+      </button>
+      <a href="https://wa.me/5534991893851?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20saber%20mais%20%F0%9F%A6%92" target="_blank" rel="noreferrer" style="background:#25d366;color:white;font-family:'Fredoka One',cursive;font-size:16px;padding:12px 30px;border-radius:30px;text-decoration:none;box-shadow:0 5px 0 #1aab52;display:flex;align-items:center;gap:8px">
+        💬 Falar no WhatsApp
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- PROMO STRIP -->
+<div style="background:#f5b731;padding:12px 20px;text-align:center;font-family:'Fredoka One',cursive;font-size:17px;color:#3e1f0a;box-shadow:0 3px 0 #c48a00">
+  🎁 Cupom&nbsp;<span class="promo-code">BEMVINDO10</span>&nbsp;— 10% OFF na primeira compra!
+</div>
+
+<!-- CATALOG -->
+<div id="catalog" style="background:#fffbf5;padding:44px 20px 64px">
+  <!-- trust badges -->
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:32px">
+    <div class="badge">🚚 Entrega Rápida</div>
+    <div class="badge">🔒 Pagamento Seguro</div>
+    <div class="badge">🔄 Troca Fácil</div>
+    <div class="badge">⭐ +5.000 Clientes</div>
+  </div>
+
+  <h2 style="font-family:'Fredoka One',cursive;font-size:clamp(1.6rem,5vw,2.4rem);color:#6b3a1f;text-align:center;margin-bottom:6px">🛍️ Nossos Produtos</h2>
+  <p style="text-align:center;color:#aaa;font-size:15px;margin-bottom:30px">Cada peça escolhida com amor para seu pequeno aventureiro! 🦒</p>
+
+  <!-- category pills -->
+  <div id="cat-pills" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:32px"></div>
+
+  <!-- product grid -->
+  <div id="product-grid"></div>
+</div>
+
+<!-- INVITE BANNER -->
+<div style="background:linear-gradient(135deg,#f5b731,#e8853a);padding:54px 20px;text-align:center;position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;opacity:.1;background-image:radial-gradient(circle 22px at 50px 30px,#6b3a1f 99%,transparent);background-size:130px 60px"></div>
+  <h2 style="font-family:'Fredoka One',cursive;font-size:clamp(1.6rem,5vw,2.4rem);color:white;text-shadow:2px 2px 0 rgba(0,0,0,.2);margin-bottom:12px;position:relative">✨ Veste quem cresce rápido!</h2>
+  <p style="color:rgba(255,255,255,.92);font-size:16px;font-weight:700;margin-bottom:28px;max-width:500px;margin:0 auto 28px;position:relative">
+    Qualidade, conforto e muito estilo em cada peça.<br/>Porque o seu filho merece o melhor! 💛
+  </p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+    <button onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})" style="background:#3e1f0a;color:#f5b731;font-family:'Fredoka One',cursive;font-size:16px;padding:14px 34px;border-radius:30px;border:none;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.25)">
+      🛍️ Quero Comprar Agora!
+    </button>
+    <a href="https://wa.me/5534991893851?text=Ol%C3%A1!%20Quero%20tirar%20d%C3%BAvidas%20sobre%20os%20produtos%20%F0%9F%A6%92" target="_blank" rel="noreferrer" style="background:#25d366;color:white;font-family:'Fredoka One',cursive;font-size:16px;padding:14px 34px;border-radius:30px;text-decoration:none;box-shadow:0 5px 0 rgba(0,100,50,.4);display:flex;align-items:center;gap:8px">
+      💬 Falar com a Loja
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div style="background:#3e1f0a;color:#f5b731;text-align:center;padding:26px 20px;font-family:'Fredoka One',cursive;font-size:17px">
+  🦒 Cresci e Perdi — Moda Infantil
+  <div style="color:rgba(255,255,255,.6);font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;margin-top:6px">Qualidade e amor em cada detalhe 💛</div>
+</div>
+
+<!-- CART DRAWER -->
+<div id="cart-drawer-wrap" style="display:none;position:fixed;inset:0;z-index:500;display:none">
+  <div style="display:flex;height:100%">
+    <div onclick="closeCart()" style="background:rgba(0,0,0,.5);flex:1;cursor:pointer"></div>
+    <div class="cart-drawer" id="cart-drawer">
+      <div style="padding:20px 24px;border-bottom:2px solid #f5f0e8;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-family:'Fredoka One',cursive;font-size:22px;color:#6b3a1f">🛒 Carrinho</div>
+        <button onclick="closeCart()" class="close-btn">✕</button>
+      </div>
+      <div id="cart-items" style="flex:1;overflow-y:auto;padding:16px 24px"></div>
+      <div id="cart-footer" style="display:none;padding:20px 24px;border-top:2px solid #f5f0e8">
+        <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+          <span style="font-family:'Fredoka One',cursive;font-size:18px;color:#6b3a1f">Total</span>
+          <span id="cart-total-display" style="font-family:'Fredoka One',cursive;font-size:22px;color:#e8853a"></span>
+        </div>
+        <button onclick="goToCheckout()" style="width:100%;background:#f5b731;color:#3e1f0a;font-family:'Fredoka One',cursive;font-size:18px;padding:14px;border-radius:16px;border:none;cursor:pointer;box-shadow:0 4px 0 #c48a00">
+          🚀 Finalizar Pedido
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div id="product-modal" class="overlay" style="display:none">
+  <div class="modal-box">
+    <button onclick="closeModal()" class="close-btn">✕</button>
+    <div id="modal-emoji" style="font-size:80px;text-align:center;margin-bottom:14px"></div>
+    <div id="modal-cat" style="font-size:11px;font-weight:800;color:#e8853a;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px"></div>
+    <div id="modal-name" style="font-family:'Fredoka One',cursive;font-size:22px;color:#6b3a1f;margin-bottom:8px"></div>
+    <div id="modal-desc" style="font-size:15px;color:#777;line-height:1.6;margin-bottom:18px"></div>
+    <div id="modal-price" style="font-family:'Fredoka One',cursive;font-size:28px;color:#e8853a;margin-bottom:18px"></div>
+    <button id="modal-add-btn" style="width:100%;background:#f5b731;color:#3e1f0a;font-family:'Fredoka One',cursive;font-size:18px;padding:14px;border-radius:16px;border:none;cursor:pointer;box-shadow:0 4px 0 #c48a00">
+      🛒 Adicionar ao Carrinho
+    </button>
+  </div>
+</div>
+
+<!-- CHECKOUT -->
+<div id="checkout-overlay" class="checkout-overlay" style="display:none">
+  <div class="checkout-box">
+    <button onclick="closeCheckout()" class="close-btn">✕</button>
+    <!-- progress -->
+    <div id="checkout-progress" style="display:flex;gap:8px;margin-bottom:28px"></div>
+    <!-- step content -->
+    <div id="checkout-content"></div>
+  </div>
+</div>
+
+<!-- WA BUTTON -->
+<a id="wa-btn" href="https://wa.me/5534991893851?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20Cresci%20e%20Perdi%20%F0%9F%A6%92" target="_blank" rel="noreferrer">
+  <svg viewBox="0 0 24 24" width="34" height="34" fill="white">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.103 1.523 5.826L0 24l6.345-1.505A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-5.001-1.371l-.359-.214-3.716.882.899-3.628-.234-.373A9.786 9.786 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+  </svg>
+</a>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- FOOTER -->
+<div style="text-align:center;padding:24px 16px 80px;font-family:'Nunito',sans-serif;font-size:13px;color:#aaa;background:#f8f4ef">
+  Desenvolvido por <strong style="color:#6b3a1f">Jennifer Silveira</strong> &bull; <a href="mailto:jenny79ari@gmail.com" style="color:#e8853a;text-decoration:none">jenny79ari@gmail.com</a> &bull; 19 de maio de 2026 &bull; © 2026
+</div>
+
+<script>
+const STORE_PHONE = "5534991893851";
+const PRODUCTS = [
+  {id:1,name:"Body Manga Longa Girafinha",cat:"Bebês",price:49.90,emoji:"👶",desc:"Lindo body com estampa de girafinha, tecido macio e confortável para o bebê."},
+  {id:2,name:"Conjunto Verão Bebê",cat:"Bebês",price:69.90,emoji:"☀️",desc:"Conjunto fresquinho para os dias quentes, perfeito para passeios e brincadeiras."},
+  {id:3,name:"Kit Enxoval Completo",cat:"Enxoval",price:199.90,emoji:"🎀",desc:"Kit completo com peças essenciais para receber o bebê com todo conforto."},
+  {id:4,name:"Vestido Floral Menina",cat:"Meninas",price:89.90,emoji:"🌸",desc:"Vestido delicado com estampa floral, ideal para ocasiões especiais e passeios."},
+  {id:5,name:"Conjunto Tie-Dye Menina",cat:"Meninas",price:79.90,emoji:"🌈",desc:"Conjunto estiloso com estampa tie-dye, moderno e super confortável."},
+  {id:6,name:"Camiseta Dino Menino",cat:"Meninos",price:44.90,emoji:"🦕",desc:"Camiseta divertida com estampa de dinossauro, sucesso garantido!"},
+  {id:7,name:"Bermuda Cargo Menino",cat:"Meninos",price:59.90,emoji:"🩳",desc:"Bermuda com bolsos laterais, prática e estilosa para o dia a dia."},
+  {id:8,name:"Look Festa Princesa",cat:"Festa",price:139.90,emoji:"👸",desc:"Look completo de princesa para festas e ocasiões especiais."},
+  {id:9,name:"Roupa de Festa Menino",cat:"Festa",price:119.90,emoji:"🤵",desc:"Conjunto elegante para festas, com visual sofisticado e muito conforto."},
+  {id:10,name:"Mochila Escolar Girafinha",cat:"Escola",price:99.90,emoji:"🎒",desc:"Mochila resistente e espaçosa com estampa de girafinha, perfeita para a escola."},
+  {id:11,name:"Kit Escola Completo",cat:"Escola",price:179.90,emoji:"📚",desc:"Kit completo para o início das aulas: mochila, estojo e lancheira combinando."},
+  {id:12,name:"Pijama Astronauta",cat:"Bebês",price:64.90,emoji:"🚀",desc:"Pijama quentinho com estampa de astronauta, para sonhos estrelados."},
+];
+const CATS = ["Todos","Bebês","Meninas","Meninos","Festa","Escola","Enxoval"];
+const CARD_BG = {
+  "Bebês":"linear-gradient(135deg,#ffd6e7,#ffb3cb)",
+  "Meninas":"linear-gradient(135deg,#d6eaff,#a8d0ff)",
+  "Meninos":"linear-gradient(135deg,#d6ffe8,#a8ffc8)",
+  "Festa":"linear-gradient(135deg,#f0d6ff,#d9a0ff)",
+  "Escola":"linear-gradient(135deg,#fffbd6,#fff0a0)",
+  "Enxoval":"linear-gradient(135deg,#fff0d6,#ffd9a0)",
+};
+
+let cart = [];
+let currentCat = "Todos";
+let selectedProduct = null;
+let checkoutStep = 1;
+let checkoutForm = {name:"",phone:"",email:"",address:"",city:"",cep:""};
+let paymentMethod = "pix";
+
+function fmt(n){return "R$ "+Number(n).toFixed(2).replace(".",",")}
+function genId(){return "CEP"+Date.now().toString(36).toUpperCase()}
+function waLink(m){return `https://wa.me/${STORE_PHONE}?text=${encodeURIComponent(m)}`}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{t.style.display="none"},3200);
+}
+
+// ── CART ──
+function cartCount(){return cart.reduce((s,i)=>s+i.qty,0)}
+function cartTotal(){return cart.reduce((s,i)=>s+i.price*i.qty,0)}
+
+function addToCart(p){
+  const ex = cart.find(i=>i.id===p.id);
+  if(ex) ex.qty++;
+  else cart.push({...p,qty:1});
+  updateCartBadge();
+  showToast(`✅ ${p.name} adicionado!`);
+  renderCartItems();
+}
+function changeQty(id,d){
+  const item = cart.find(i=>i.id===id);
+  if(item){item.qty=Math.max(1,item.qty+d);}
+  updateCartBadge();
+  renderCartItems();
+}
+function removeItem(id){
+  cart = cart.filter(i=>i.id!==id);
+  updateCartBadge();
+  renderCartItems();
+}
+function updateCartBadge(){
+  const b = document.getElementById("cart-badge");
+  const c = cartCount();
+  if(c>0){b.style.display="flex";b.textContent=c;}
+  else b.style.display="none";
+}
+
+// ── CART DRAWER ──
+function openCart(){
+  const w = document.getElementById("cart-drawer-wrap");
+  w.style.display="flex";
+  renderCartItems();
+}
+function closeCart(){document.getElementById("cart-drawer-wrap").style.display="none"}
+function renderCartItems(){
+  const el = document.getElementById("cart-items");
+  const footer = document.getElementById("cart-footer");
+  if(cart.length===0){
+    el.innerHTML=`<div style="text-align:center;padding:50px 0;color:#ccc"><div style="font-size:56px">🛒</div><div style="font-family:'Fredoka One',cursive;font-size:20px;margin-top:12px">Carrinho vazio</div></div>`;
+    footer.style.display="none";
+    return;
+  }
+  el.innerHTML = cart.map(item=>`
+    <div style="display:flex;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid #f0e8e0">
+      <div style="width:54px;height:54px;border-radius:12px;background:#fff5e8;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0">${item.emoji}</div>
+      <div style="flex:1">
+        <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#6b3a1f">${item.name}</div>
+        <div style="font-size:14px;color:#e8853a;font-weight:800">${fmt(item.price*item.qty)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onclick="changeQty(${item.id},-1)" class="qty-minus">−</button>
+        <span style="font-weight:800;font-size:15px;min-width:20px;text-align:center">${item.qty}</span>
+        <button onclick="changeQty(${item.id},+1)" class="qty-plus">+</button>
+      </div>
+      <button onclick="removeItem(${item.id})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:18px">✕</button>
+    </div>
+  `).join("");
+  footer.style.display="block";
+  document.getElementById("cart-total-display").textContent = fmt(cartTotal());
+}
+
+// ── PRODUCT MODAL ──
+function openModal(p){
+  selectedProduct = p;
+  document.getElementById("modal-emoji").textContent = p.emoji;
+  document.getElementById("modal-cat").textContent = p.cat;
+  document.getElementById("modal-name").textContent = p.name;
+  document.getElementById("modal-desc").textContent = p.desc;
+  document.getElementById("modal-price").textContent = fmt(p.price);
+  document.getElementById("modal-add-btn").onclick = ()=>{addToCart(p);closeModal()};
+  document.getElementById("product-modal").style.display="flex";
+}
+function closeModal(){document.getElementById("product-modal").style.display="none"}
+
+// ── RENDER PRODUCTS ──
+function renderProducts(){
+  const grid = document.getElementById("product-grid");
+  const filtered = currentCat==="Todos"?PRODUCTS:PRODUCTS.filter(p=>p.cat===currentCat);
+  grid.innerHTML = filtered.map((p,i)=>`
+    <div class="pcard" style="background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(107,58,31,.1);position:relative;animation-delay:${i*.05}s">
+      <div onclick="openModal(${p.id})" style="height:162px;display:flex;align-items:center;justify-content:center;background:${CARD_BG[p.cat]||'#f5f0e8'};font-size:64px;cursor:pointer">
+        ${p.emoji}
+      </div>
+      <div style="padding:16px 18px 20px">
+        <div style="font-size:11px;font-weight:800;color:#e8853a;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px">${p.cat}</div>
+        <div onclick="openModal(${p.id})" style="font-family:'Fredoka One',cursive;font-size:17px;color:#6b3a1f;margin-bottom:6px;cursor:pointer">${p.name}</div>
+        <div style="font-size:13px;color:#999;line-height:1.5;margin-bottom:14px">${p.desc}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#6b3a1f">${fmt(p.price)}</div>
+          <button class="badd" onclick="addToCart(PRODUCTS.find(x=>x.id===${p.id}))" style="background:#f5b731;color:#3e1f0a;font-family:'Fredoka One',cursive;font-size:14px;border:none;padding:8px 18px;border-radius:20px;cursor:pointer;box-shadow:0 3px 0 #c48a00">
+            + Carrinho
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+// ── RENDER CAT PILLS ──
+function renderCats(){
+  const el = document.getElementById("cat-pills");
+  el.innerHTML = CATS.map(c=>`
+    <button class="cat-pill ${currentCat===c?'active':''}" onclick="setCat('${c}')">${c}</button>
+  `).join("");
+}
+function setCat(c){currentCat=c;renderCats();renderProducts();}
+
+// ── CHECKOUT ──
+function goToCheckout(){closeCart();openCheckout();}
+function openCheckout(){
+  checkoutStep=1;
+  document.getElementById("checkout-overlay").style.display="flex";
+  renderCheckout();
+}
+function closeCheckout(){document.getElementById("checkout-overlay").style.display="none"}
+
+function renderCheckout(){
+  renderProgress();
+  renderCheckoutContent();
+}
+
+function renderProgress(){
+  const steps=["Dados","Pagamento","Confirmar"];
+  document.getElementById("checkout-progress").innerHTML = steps.map((s,i)=>`
+    <div class="prog-step">
+      <div class="prog-circle" style="background:${checkoutStep>i+1?'#f5b731':checkoutStep===i+1?'#6b3a1f':'#e8e0d8'};color:${checkoutStep>i+1?'#3e1f0a':checkoutStep===i+1?'#f5b731':'#aaa'}">
+        ${checkoutStep>i+1?'✓':i+1}
+      </div>
+      <div style="font-size:11px;font-weight:700;color:${checkoutStep===i+1?'#6b3a1f':'#aaa'}">${s}</div>
+    </div>
+  `).join("");
+}
+
+function validateForm(){
+  let ok=true;
+  const errs={};
+  if(!checkoutForm.name.trim()){errs.name="Nome obrigatório";ok=false;}
+  if(!checkoutForm.phone.replace(/\D/g,"").match(/^\d{10,11}$/)){errs.phone="Telefone inválido (10 ou 11 dígitos)";ok=false;}
+  if(!checkoutForm.address.trim()){errs.address="Endereço obrigatório";ok=false;}
+  if(!checkoutForm.city.trim()){errs.city="Cidade obrigatória";ok=false;}
+  if(!checkoutForm.cep.replace(/\D/g,"").match(/^\d{8}$/)){errs.cep="CEP inválido (8 dígitos)";ok=false;}
+  return {ok,errs};
+}
+
+function renderCheckoutContent(){
+  const el = document.getElementById("checkout-content");
+  if(checkoutStep===1){
+    el.innerHTML=`
+      <div style="font-family:'Fredoka One',cursive;font-size:22px;color:#6b3a1f;margin-bottom:20px">📋 Seus Dados</div>
+      <div style="display:flex;flex-direction:column;gap:14px" id="step1-fields">
+        <div><input class="form-input" id="f-name" placeholder="👤 Nome completo" value="${checkoutForm.name}" oninput="checkoutForm.name=this.value"/><div class="err-msg" id="e-name"></div></div>
+        <div><input class="form-input" id="f-phone" placeholder="📱 WhatsApp (somente números)" value="${checkoutForm.phone}" oninput="checkoutForm.phone=this.value"/><div class="err-msg" id="e-phone"></div></div>
+        <div><input class="form-input" id="f-email" placeholder="📧 E-mail (opcional)" value="${checkoutForm.email}" oninput="checkoutForm.email=this.value"/></div>
+        <div><input class="form-input" id="f-address" placeholder="🏠 Endereço completo" value="${checkoutForm.address}" oninput="checkoutForm.address=this.value"/><div class="err-msg" id="e-address"></div></div>
+        <div><input class="form-input" id="f-city" placeholder="🏙️ Cidade" value="${checkoutForm.city}" oninput="checkoutForm.city=this.value"/><div class="err-msg" id="e-city"></div></div>
+        <div><input class="form-input" id="f-cep" placeholder="📮 CEP (somente números)" value="${checkoutForm.cep}" oninput="checkoutForm.cep=this.value"/><div class="err-msg" id="e-cep"></div></div>
+      </div>
+      <button onclick="step1Next()" style="width:100%;background:#f5b731;color:#3e1f0a;font-family:'Fredoka One',cursive;font-size:18px;padding:14px;border-radius:16px;border:none;cursor:pointer;box-shadow:0 4px 0 #c48a00;margin-top:20px">Próximo →</button>
+    `;
+  } else if(checkoutStep===2){
+    el.innerHTML=`
+      <div style="font-family:'Fredoka One',cursive;font-size:22px;color:#6b3a1f;margin-bottom:8px">💳 Pagamento</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#e8853a;margin-bottom:16px">Como deseja pagar?</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+        ${[["pix","🟩 PIX","Instantâneo, sem taxas!"],["card","💳 Cartão de Crédito","Em até 12x sem juros"],["boleto","🧾 Boleto","Vence em 3 dias úteis"]].map(([v,label,sub])=>`
+          <label class="pay-label ${paymentMethod===v?'selected':''}" onclick="setPayment('${v}')">
+            <div style="width:22px;height:22px;border-radius:50%;border:3px solid ${paymentMethod===v?'#f5b731':'#ccc'};display:flex;align-items:center;justify-content:center">
+              ${paymentMethod===v?`<div style="width:10px;height:10px;border-radius:50%;background:#f5b731"></div>`:''}
+            </div>
+            <div>
+              <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#6b3a1f">${label}</div>
+              <div style="font-size:13px;color:#999">${sub}</div>
+            </div>
+          </label>
+        `).join("")}
+      </div>
+      ${paymentMethod==="pix"?`<div style="background:#f0fff4;border:2px solid #10b981;border-radius:16px;padding:16px;margin-bottom:16px;text-align:center"><div style="font-size:36px;margin-bottom:6px">📱</div><div style="font-family:'Fredoka One',cursive;font-size:15px;color:#065f46">Chave PIX</div><div style="font-size:17px;font-weight:800;color:#047857;margin:4px 0">cresci.epercdi@pagamentos.com</div><div style="font-size:12px;color:#6b7280">Confirmado em até 5 minutos</div></div>`:''}
+      <div style="display:flex;gap:10px">
+        <button onclick="setCheckoutStep(1)" style="flex:1;background:#f5f0e8;color:#6b3a1f;font-family:'Fredoka One',cursive;font-size:16px;padding:12px;border-radius:14px;border:none;cursor:pointer">← Voltar</button>
+        <button onclick="setCheckoutStep(3)" style="flex:2;background:#f5b731;color:#3e1f0a;font-family:'Fredoka One',cursive;font-size:16px;padding:12px;border-radius:14px;border:none;cursor:pointer">Próximo →</button>
+      </div>
+    `;
+  } else if(checkoutStep===3){
+    const payLabel = paymentMethod==="pix"?"PIX":paymentMethod==="card"?"Cartão de Crédito":"Boleto";
+    el.innerHTML=`
+      <div style="font-family:'Fredoka One',cursive;font-size:22px;color:#6b3a1f;margin-bottom:14px">✅ Confirmar Pedido</div>
+      <div style="background:#fffbf0;border-radius:16px;padding:16px;margin-bottom:14px">
+        <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#6b3a1f;margin-bottom:8px">Itens</div>
+        ${cart.map(i=>`<div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px"><span>${i.emoji} ${i.name} ×${i.qty}</span><strong>${fmt(i.price*i.qty)}</strong></div>`).join("")}
+        <div style="border-top:2px dashed #e8d8c0;margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-family:'Fredoka One',cursive;font-size:18px">
+          <span>Total</span><span style="color:#e8853a">${fmt(cartTotal())}</span>
+        </div>
+      </div>
+      <div style="background:#f5f0e8;border-radius:16px;padding:14px;margin-bottom:14px;font-size:14px;line-height:1.7">
+        <strong>👤 ${checkoutForm.name}</strong><br/>
+        📱 ${checkoutForm.phone}<br/>
+        🏠 ${checkoutForm.address}, ${checkoutForm.city} — ${checkoutForm.cep}<br/>
+        🧾 ${payLabel}
+      </div>
+      <div style="background:#f0fff4;border-radius:14px;padding:12px;margin-bottom:18px;font-size:13px;color:#047857;font-weight:700;text-align:center">
+        📱 Você receberá atualizações no WhatsApp <strong>${checkoutForm.phone}</strong>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button onclick="setCheckoutStep(2)" style="flex:1;background:#f5f0e8;color:#6b3a1f;font-family:'Fredoka One',cursive;font-size:16px;padding:12px;border-radius:14px;border:none;cursor:pointer">← Voltar</button>
+        <button onclick="confirmOrder()" style="flex:2;background:#10b981;color:white;font-family:'Fredoka One',cursive;font-size:16px;padding:12px;border-radius:14px;border:none;cursor:pointer">✅ Confirmar Pedido</button>
+      </div>
+    `;
+  }
+}
+
+function step1Next(){
+  // update from inputs
+  checkoutForm.name = document.getElementById("f-name")?.value||checkoutForm.name;
+  checkoutForm.phone = document.getElementById("f-phone")?.value||checkoutForm.phone;
+  checkoutForm.email = document.getElementById("f-email")?.value||checkoutForm.email;
+  checkoutForm.address = document.getElementById("f-address")?.value||checkoutForm.address;
+  checkoutForm.city = document.getElementById("f-city")?.value||checkoutForm.city;
+  checkoutForm.cep = document.getElementById("f-cep")?.value||checkoutForm.cep;
+  const {ok,errs} = validateForm();
+  if(!ok){
+    ["name","phone","address","city","cep"].forEach(f=>{
+      const em = document.getElementById("e-"+f);
+      if(em) em.textContent = errs[f]||"";
+      const inp = document.getElementById("f-"+f);
+      if(inp) inp.classList.toggle("error",!!errs[f]);
+    });
+    return;
+  }
+  setCheckoutStep(2);
+}
+
+function setPayment(v){paymentMethod=v;renderCheckoutContent();}
+function setCheckoutStep(s){checkoutStep=s;renderCheckout();}
+
+function confirmOrder(){
+  const order={id:genId(),items:cart,total:cartTotal(),customer:checkoutForm,payment:paymentMethod,status:"pending",createdAt:Date.now()};
+  cart=[];
+  updateCartBadge();
+  closeCheckout();
+  showToast("🎉 Pedido realizado com sucesso!");
+  // build WA message
+  const items = order.items.map(i=>`${i.emoji} ${i.name} x${i.qty} — ${fmt(i.price*i.qty)}`).join("\n");
+  const msg = `🛍️ *Novo Pedido — Cresci e Perdi*\n\n*Pedido:* ${order.id}\n\n*Itens:*\n${items}\n\n*Total:* ${fmt(order.total)}\n\n*Cliente:* ${order.customer.name}\n*WhatsApp:* ${order.customer.phone}\n*Endereço:* ${order.customer.address}, ${order.customer.city} — ${order.customer.cep}\n*Pagamento:* ${order.payment.toUpperCase()}`;
+  window.open(waLink(msg),"_blank");
+}
+
+// ── INIT ──
+renderCats();
+renderProducts();
+</script>
+</body>
+</html>
